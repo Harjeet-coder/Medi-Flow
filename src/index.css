@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* MediFlow Hospital Management System Design System
+All colors MUST be HSL - Medical/Healthcare themed
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 210 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 15% 15%;
+
+    /* Medical blue primary theme */
+    --primary: 210 95% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 210 95% 40%;
+
+    /* Healthcare green secondary */
+    --secondary: 142 76% 36%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 142 76% 31%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 210 15% 45%;
+
+    --accent: 210 20% 96%;
+    --accent-foreground: 210 15% 15%;
+
+    /* Medical emergency red */
+    --destructive: 0 85% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Healthcare success green */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Medical warning amber */
+    --warning: 45 93% 47%;
+    --warning-foreground: 45 20% 15%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 210 95% 45%;
+
+    /* Medical gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-hover)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 76% 31%));
+    --gradient-medical: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+    
+    /* Dashboard shadows */
+    --shadow-card: 0 4px 6px -1px hsl(210 20% 10% / 0.1), 0 2px 4px -1px hsl(210 20% 10% / 0.06);
+    --shadow-hover: 0 10px 15px -3px hsl(210 20% 10% / 0.1), 0 4px 6px -2px hsl(210 20% 10% / 0.05);
+    
+    /* Medical status colors */
+    --status-available: 142 76% 36%;
+    --status-occupied: 0 85% 55%;
+    --status-cleaning: 45 93% 47%;
+    --status-reserved: 210 20% 65%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 210 20% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 210 20% 10%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 210 20% 10%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 210 95% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 210 95% 45%;
+
+    --secondary: 142 76% 40%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 142 76% 35%;
+
+    --muted: 210 20% 15%;
+    --muted-foreground: 210 15% 65%;
+
+    --accent: 210 20% 15%;
+    --accent-foreground: 210 20% 95%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 52%;
+    --warning-foreground: 45 20% 15%;
+
+    --border: 210 20% 20%;
+    --input: 210 20% 20%;
+    --ring: 210 95% 50%;
+
+    --status-available: 142 76% 40%;
+    --status-occupied: 0 85% 60%;
+    --status-cleaning: 45 93% 52%;
+    --status-reserved: 210 20% 50%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
