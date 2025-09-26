@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,18 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Search, Clock, TrendingUp } from 'lucide-react';
-import { Patient, mockPatients, getWaitingTimesData, getAdmissionTrend } from '@/data/mockData';
+import { Patient, mockPatients, getWaitingTimesData, getAdmissionTrend, departments } from '@/data/mockData';
 
-// Define wards here if not exported from mockData
-const wards = [
-  "General",
-  "ICU",
-  "Pediatrics",
-  "Maternity",
-  "Surgery",
-  "Orthopedics",
-  "Cardiology"
-];
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -48,6 +38,31 @@ const PatientDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterWard, setFilterWard] = useState<string>('all');
   const { toast } = useToast();
+
+  // State for current date and time
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  // Pagination state for patient list
+  const [patientCurrentPage, setPatientCurrentPage] = useState(1);
+  const patientsPerPage = 10; // Number of patients to display per page
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -114,31 +129,15 @@ const PatientDashboard: React.FC = () => {
     return matchesSearch && matchesWard;
   });
 
+  // Pagination logic for patient list
+  const totalPatientPages = Math.ceil(filteredPatients.length / patientsPerPage);
+  const patientStartIndex = (patientCurrentPage - 1) * patientsPerPage;
+  const patientEndIndex = patientStartIndex + patientsPerPage;
+  const patientsToDisplay = filteredPatients.slice(patientStartIndex, patientEndIndex);
+
   // Waiting times data
   const waitingTimesData = getWaitingTimesData();
   
-  // Admission trend chart data
-  const admissionTrendData = getAdmissionTrend();
-  const chartData = {
-    labels: admissionTrendData.map(item => new Date(item.date).toLocaleDateString()),
-    datasets: [
-      {
-        label: 'Admissions',
-        data: admissionTrendData.map(item => item.admissions),
-        borderColor: 'hsl(var(--primary))',
-        backgroundColor: 'hsl(var(--primary) / 0.1)',
-        tension: 0.4,
-      },
-      {
-        label: 'Discharges',
-        data: admissionTrendData.map(item => item.discharges),
-        borderColor: 'hsl(var(--secondary))',
-        backgroundColor: 'hsl(var(--secondary) / 0.1)',
-        tension: 0.4,
-      },
-    ],
-  };
-
   const chartOptions = {
     responsive: true,
     plugins: {
@@ -159,11 +158,18 @@ const PatientDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Patient Management</h1>
           <p className="text-muted-foreground">Manage patient admissions and waiting times</p>
         </div>
+        <div className="text-right">
+          <p className="text-sm text-muted-foreground">{formatDate(currentDateTime)}</p>
+          <p className="text-2xl font-bold">{formatTime(currentDateTime)}</p>
+        </div>
+      </div>
+
+      <div className="flex justify-end mb-4">
         <Button onClick={() => setShowAddForm(true)} className="flex items-center">
           <Plus className="h-4 w-4 mr-2" />
           Add Patient
@@ -174,6 +180,7 @@ const PatientDashboard: React.FC = () => {
         <TabsList>
           <TabsTrigger value="patients">Patient List</TabsTrigger>
           <TabsTrigger value="waiting-times">Waiting Times</TabsTrigger>
+          {/* Removed Admission Trends Tab */}
         </TabsList>
 
         <TabsContent value="patients" className="space-y-6">
@@ -251,7 +258,7 @@ const PatientDashboard: React.FC = () => {
                         <SelectValue placeholder="Select ward" />
                       </SelectTrigger>
                       <SelectContent>
-                        {wards.map(ward => (
+                        {departments.map(ward => (
                             <SelectItem key={ward} value={ward}>{ward}</SelectItem>
                         ))}
                       </SelectContent>
@@ -321,7 +328,7 @@ const PatientDashboard: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Wards</SelectItem>
-                    {wards.map(ward => (
+                    {departments.map(ward => (
                         <SelectItem key={ward} value={ward}>{ward}</SelectItem>
                     ))}
                   </SelectContent>
@@ -338,7 +345,7 @@ const PatientDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {filteredPatients.map((patient) => (
+                {patientsToDisplay.map((patient) => (
                   <div key={patient.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="space-y-1">
@@ -370,6 +377,28 @@ const PatientDashboard: React.FC = () => {
                   </div>
                 )}
               </div>
+              {/* Pagination Controls */}
+              {totalPatientPages > 1 && (
+                <div className="flex justify-between items-center mt-4">
+                  <Button
+                    variant="outline"
+                    disabled={patientCurrentPage === 1}
+                    onClick={() => setPatientCurrentPage(prev => Math.max(1, prev - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Page {patientCurrentPage} of {totalPatientPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={patientCurrentPage === totalPatientPages}
+                    onClick={() => setPatientCurrentPage(prev => Math.min(totalPatientPages, prev + 1))}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -411,26 +440,10 @@ const PatientDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
-
-        <TabsContent value="trends" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-                Admission Trends
-              </CardTitle>
-              <CardDescription>Hospital admission and discharge patterns over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-96">
-                <Line data={chartData} options={chartOptions} />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
 };
 
 export default PatientDashboard;
+

@@ -107,18 +107,34 @@ const IllnessDashboard: React.FC = () => {
     return acc;
   }, {} as { [key: string]: number });
 
-  // Chart data for most common illnesses
-  const illnessChartData = {
-    labels: Object.keys(illnessStats),
+  // Chart data for department workload (bar chart)
+  const departmentBarChartData = {
+    labels: Object.keys(departmentStats),
     datasets: [
       {
         label: 'Number of Cases',
-        data: Object.values(illnessStats),
+        data: Object.values(departmentStats),
         backgroundColor: [
-          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', 
-          '#5D8BF4', '#F36E6E', '#8E44AD', '#2ECC71', '#E67E22', '#D35400', 
-          '#34495E', '#A9CCE3', '#5B2C6F', '#F1948A', '#C0392B', '#FAD7A0', 
-          '#16A085', '#27AE60',
+          '#6384FF', // A vibrant blue
+          '#FFC856', // A bright yellow/orange
+          '#30D5C8', // A cool turquoise
+          '#FF7F50', // A fiery coral
+          '#50BFE6', // A light blue
+          '#FFD700', // Gold
+          '#FF6347', // Tomato red
+          '#87CEEB', // Sky blue
+          '#DA70D6', // Orchid
+          '#3CB371', // Medium sea green
+          '#FFA07A', // Light salmon
+          '#20B2AA', // Light sea green
+          '#C71585', // Medium violet red
+          '#FF4500', // Orange red
+          '#4682B4', // Steel blue
+          '#FFDAB9', // Peach puff
+          '#ADD8E6', // Light blue
+          '#F08080', // Light coral
+          '#90EE90', // Light green
+          '#DDA0DD', // Plum
         ],
         borderColor: 'white',
         borderWidth: 2,
@@ -147,10 +163,11 @@ const IllnessDashboard: React.FC = () => {
     plugins: {
       legend: {
         position: 'top' as const,
+        display: false, // Hide legend since each bar has a different color
       },
       title: {
         display: true,
-        text: 'Most Common Illnesses',
+        text: 'Department Workload',
       },
     },
     scales: {
@@ -167,7 +184,10 @@ const IllnessDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold text-foreground">Illness Insights</h1>
           <p className="text-muted-foreground">Track diseases, patterns, and department analytics</p>
         </div>
-        
+        <Button onClick={() => setShowAddForm(true)} className="flex items-center">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Record
+        </Button>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
@@ -232,12 +252,12 @@ const IllnessDashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Most Common Illnesses</CardTitle>
-                <CardDescription>Frequency of diagnoses</CardDescription>
+                <CardTitle>Department Workload (Bar Chart)</CardTitle>
+                <CardDescription>Case distribution by department</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-80">
-                  <Bar data={illnessChartData} options={chartOptions} />
+                  <Bar data={departmentBarChartData} options={chartOptions} />
                 </div>
               </CardContent>
             </Card>
@@ -500,3 +520,4 @@ const IllnessDashboard: React.FC = () => {
 };
 
 export default IllnessDashboard;
+

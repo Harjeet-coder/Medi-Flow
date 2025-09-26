@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Bed, BedDouble, User, UserCheck, UserX, Plus, Filter, Building } from 'lucide-react';
-import { Bed as BedType, mockBeds, mockPatients } from '@/data/mockData';
+import { Bed as BedType, departments, mockBeds, mockPatients } from '@/data/mockData';
 
 const BedDashboard: React.FC = () => {
   const [beds, setBeds] = useState<BedType[]>(mockBeds);
@@ -469,7 +469,7 @@ const BedDashboard: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Wards</SelectItem>
-                    {wards.map(ward => (
+                    {departments.map(ward => (
                       <SelectItem key={ward} value={ward}>{ward}</SelectItem>
                     ))}
                   </SelectContent>

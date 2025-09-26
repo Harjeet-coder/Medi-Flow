@@ -426,18 +426,6 @@ const BloodBankDashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Blood Type Distribution</CardTitle>
-                <CardDescription>Current inventory by blood type</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <Pie data={chartData} options={chartOptions} />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
                 <CardTitle>Stock Status Overview</CardTitle>
                 <CardDescription>Inventory levels compared to minimum thresholds</CardDescription>
               </CardHeader>
@@ -474,36 +462,38 @@ const BloodBankDashboard: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Transaction Summary</CardTitle>
+                <CardDescription>Donation vs usage statistics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-secondary">
+                      {transactions.filter(t => t.type === 'Donation').length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Total Donations</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-primary">
+                      {transactions.filter(t => t.type === 'Usage').length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Total Usage</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-warning">
+                      {transactions.reduce((acc, t) => acc + t.units, 0)}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Total Units Handled</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction Summary</CardTitle>
-              <CardDescription>Donation vs usage statistics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <div className="text-2xl font-bold text-secondary">
-                    {transactions.filter(t => t.type === 'Donation').length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Total Donations</p>
-                </div>
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <div className="text-2xl font-bold text-primary">
-                    {transactions.filter(t => t.type === 'Usage').length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Total Usage</p>
-                </div>
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <div className="text-2xl font-bold text-warning">
-                    {transactions.reduce((acc, t) => acc + t.units, 0)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Total Units Handled</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
         </TabsContent>
       </Tabs>
     </div>

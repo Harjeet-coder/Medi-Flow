@@ -81,26 +81,8 @@ export const departments = [
 const generateMockIllnesses = (count: number): Illness[] => {
   const patientNames = ['John Doe', 'Jane Smith', 'Peter Jones', 'Mary Brown', 'David Wilson', 'Emily Davis', 'William Green'];
   const diagnoses = [
-    'ICU',
-    'Emergency',
-    'Surgery',
-    'Maternity',
-    'Pediatrics',
-    'Psychiatry',
-    'Rehabilitation',
-    'Oncology',
-    'Cardiology',
-    'Neurology',
-    'Orthopedics',
-    'ENT',
-    'Dermatology',
-    'Ophthalmology',
-    'Urology',
-    'Gynecology',
-    'Neonatal',
-    'Burns Unit',
-    'Isolation',
-    'Day Care',
+    'Influenza', 'Pneumonia', 'Heart Attack', 'Appendicitis', 'Stroke', 'Fracture', 
+    'Severe Anaphylaxis', 'Viral Pneumonia', 'Breast Cancer', 'Angina Pectoris'
   ];
   const severities = ['Low', 'Medium', 'High', 'Critical'];
   const randomDate = () => {
@@ -127,79 +109,37 @@ const generateMockIllnesses = (count: number): Illness[] => {
 // Replace the existing mockIllnesses with the generated data
 export const mockIllnesses: Illness[] = generateMockIllnesses(100);
 
-// Mock data
-export const mockPatients: Patient[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    age: 45,
-    gender: 'Male',
-    guardian: 'Mary Smith',
-    contact: '+1-555-0123',
-    address: '123 Main St, Anytown, USA',
-    admissionDate: '2024-01-15',
-    ward: 'ICU',
-    reason: 'Chest pain',
-    consultingDoctor: 'Dr. Johnson',
-    status: 'Admitted',
-  },
-  {
-    id: '2',
-    name: 'Sarah Wilson',
-    age: 32,
-    gender: 'Female',
-    guardian: 'David Wilson',
-    contact: '+1-555-0124',
-    address: '456 Oak Ave, Anytown, USA',
-    admissionDate: '2024-01-16',
-    ward: 'Maternity',
-    reason: 'Post-surgery monitoring',
-    consultingDoctor: 'Dr. Brown',
-    status: 'In Treatment',
-  },
-  {
-    id: '3',
-    name: 'Michael Chen',
-    age: 28,
-    gender: 'Male',
-    guardian: 'Lisa Chen',
-    contact: '+1-555-0125',
-    address: '789 Pine St, Anytown, USA',
-    admissionDate: '2024-01-14',
-    ward: 'Emergency',
-    reason: 'Severe allergic reaction',
-    consultingDoctor: 'Dr. Martinez',
-    status: 'Discharged',
-  },
-  {
-    id: '4',
-    name: 'Emily Davis',
-    age: 67,
-    gender: 'Female',
-    guardian: 'Robert Davis',
-    contact: '+1-555-0126',
-    address: '101 Maple Ln, Anytown, USA',
-    admissionDate: '2024-01-17',
-    ward: 'Oncology',
-    reason: 'Chemotherapy session',
-    consultingDoctor: 'Dr. Lee',
-    status: 'Admitted',
-  },
-  {
-    id: '5',
-    name: 'William Green',
-    age: 7,
-    gender: 'Male',
-    guardian: 'Jessica Green',
-    contact: '+1-555-0127',
-    address: '202 Birch Rd, Anytown, USA',
-    admissionDate: '2024-01-17',
-    ward: 'Pediatrics',
-    reason: 'Viral infection',
-    consultingDoctor: 'Dr. Evans',
-    status: 'Admitted',
-  },
-];
+// Function to generate a large, random set of patient records
+const getRandomPatient = (id: number): Patient => {
+  const names = ['John Smith', 'Jane Wilson', 'Michael Johnson', 'Emily Davis', 'Chris Brown', 'Sarah Adams', 'David Lee'];
+  const genders = ['Male', 'Female', 'Other'];
+  const doctors = ['Dr. Johnson', 'Dr. Lee', 'Dr. Martinez', 'Dr. Evans', 'Dr. Chen'];
+  const reasons = ['Fever', 'Fracture', 'Influenza', 'Hypertension', 'Diabetes', 'Check-up', 'Chest pain', 'Allergic reaction'];
+  const statuses = ['Admitted', 'In Treatment', 'Discharged'];
+
+  const randomDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - Math.floor(Math.random() * 60));
+    return d.toISOString().split('T')[0];
+  };
+
+  return {
+    id: `patient-${id}`,
+    name: names[Math.floor(Math.random() * names.length)],
+    age: Math.floor(Math.random() * 80) + 1,
+    gender: genders[Math.floor(Math.random() * genders.length)] as Patient['gender'],
+    guardian: 'N/A',
+    contact: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
+    address: '123 Hospital Rd',
+    admissionDate: randomDate(),
+    ward: departments[Math.floor(Math.random() * departments.length)],
+    reason: reasons[Math.floor(Math.random() * reasons.length)],
+    consultingDoctor: doctors[Math.floor(Math.random() * doctors.length)],
+    status: statuses[Math.floor(Math.random() * statuses.length)] as Patient['status']
+  };
+};
+
+export const mockPatients: Patient[] = Array.from({ length: 150 }, (_, i) => getRandomPatient(i + 1));
 
 export const mockBeds: Bed[] = [
   {
