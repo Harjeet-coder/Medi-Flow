@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,18 +7,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Stethoscope } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+type UserRole = 'Admin' | 'Doctor' | 'Staff';
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // ADDED: State for the selected role, defaulting to 'Doctor'
   const [role, setRole] = useState<UserRole>('Doctor');
   const { login } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !password) {
+    if (!email || !password) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -27,11 +32,18 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    const success = login(username, password, role);
-    if (!success) {
+    try {
+      // CHANGED: Pass the selected role to the login function
+      await login(email, password, role);
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      navigate('/dashboard');
+    } catch (error) {
       toast({
         title: "Login Failed",
-        description: "Invalid credentials. Use password: 'admin123' or 'demo'",
+        description: "Invalid credentials or role. Please try again.",
         variant: "destructive",
       });
     }
@@ -52,13 +64,13 @@ const LoginPage: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
               />
             </div>
             
@@ -73,6 +85,7 @@ const LoginPage: React.FC = () => {
               />
             </div>
             
+            {/* ADDED: Role selection dropdown */}
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <Select value={role} onValueChange={(value: UserRole) => setRole(value)}>
@@ -90,11 +103,6 @@ const LoginPage: React.FC = () => {
             <Button type="submit" className="w-full">
               Sign In
             </Button>
-            
-            <div className="text-sm text-muted-foreground text-center">
-              <p>Demo credentials:</p>
-              <p>Password: <code className="bg-muted px-1 rounded">admin123</code> or <code className="bg-muted px-1 rounded">demo</code></p>
-            </div>
           </form>
         </CardContent>
       </Card>

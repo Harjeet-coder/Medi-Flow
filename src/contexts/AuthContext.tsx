@@ -1,20 +1,69 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import authService from '@/services/authService';
 
-export type UserRole = 'Admin' | 'Doctor' | 'Staff';
+// CHANGED: UserRole type now includes 'Staff'
+type UserRole = 'Admin' | 'Doctor' | 'Staff';
 
 interface User {
-  username: string;
+  userID: string;
   role: UserRole;
+  exp: number;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string, role: UserRole) => boolean;
+  isAuthenticated: boolean;
+  // CHANGED: login signature now includes role
+  login: (email, password, role: UserRole) => Promise<void>;
   logout: () => void;
-  isAuthorized: (allowedRoles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedUser = jwtDecode<User>(token);
+        if (decodedUser.exp * 1000 > Date.now()) {
+          setUser(decodedUser);
+        } else {
+          localStorage.removeItem('token');
+        }
+      } catch (error) {
+        localStorage.removeItem('token');
+      }
+    }
+  }, []);
+
+  // CHANGED: login function now accepts and passes the role
+  const login = async (email: string, password: string, role: UserRole) => {
+    await authService.login(email, password, role);
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedUser = jwtDecode<User>(token);
+      setUser(decodedUser);
+    }
+  };
+
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+  };
+
+  const value = {
+    user,
+    isAuthenticated: !!user,
+    login,
+    logout,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -22,39 +71,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-
-  const login = (username: string, password: string, role: UserRole): boolean => {
-    // Mock authentication - in real app, this would call an API
-    if (password === 'admin123' || password === 'demo') {
-      setUser({ username, role });
-      return true;
-    }
-    return false;
-  };
-
-  const logout = () => {
-    setUser(null);
-  };
-
-  const isAuthorized = (allowedRoles: UserRole[]): boolean => {
-    if (!user) return false;
-    return allowedRoles.includes(user.role);
-  };
-
-  const value: AuthContextType = {
-    user,
-    login,
-    logout,
-    isAuthorized,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
