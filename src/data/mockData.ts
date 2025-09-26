@@ -1,4 +1,4 @@
-// Mock data for the hospital management system
+// src/data/mockData.ts
 
 export interface Patient {
   id: string;
@@ -52,6 +52,81 @@ export interface BloodTransaction {
   donorName?: string;
 }
 
+// Updated list of all departments
+export const departments = [
+  'ICU',
+  'Emergency',
+  'Surgery',
+  'Maternity',
+  'Pediatrics',
+  'Psychiatry',
+  'Rehabilitation',
+  'Oncology',
+  'Cardiology',
+  'Neurology',
+  'Orthopedics',
+  'ENT',
+  'Dermatology',
+  'Ophthalmology',
+  'Urology',
+  'Gynecology',
+  'Neonatal',
+  'Burns Unit',
+  'Isolation',
+  'Day Care',
+  'General',
+];
+
+// Function to generate a random illness record
+const generateMockIllnesses = (count: number): Illness[] => {
+  const patientNames = ['John Doe', 'Jane Smith', 'Peter Jones', 'Mary Brown', 'David Wilson', 'Emily Davis', 'William Green'];
+  const diagnoses = [
+    'ICU',
+    'Emergency',
+    'Surgery',
+    'Maternity',
+    'Pediatrics',
+    'Psychiatry',
+    'Rehabilitation',
+    'Oncology',
+    'Cardiology',
+    'Neurology',
+    'Orthopedics',
+    'ENT',
+    'Dermatology',
+    'Ophthalmology',
+    'Urology',
+    'Gynecology',
+    'Neonatal',
+    'Burns Unit',
+    'Isolation',
+    'Day Care',
+  ];
+  const severities = ['Low', 'Medium', 'High', 'Critical'];
+  const randomDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - Math.floor(Math.random() * 30));
+    return d.toISOString().split('T')[0];
+  };
+
+  const generatedIllnesses: Illness[] = [];
+  for (let i = 0; i < count; i++) {
+    generatedIllnesses.push({
+      id: `illness-${i}`,
+      patientId: `patient-${Math.floor(Math.random() * 1000)}`,
+      patientName: patientNames[Math.floor(Math.random() * patientNames.length)],
+      diagnosis: diagnoses[Math.floor(Math.random() * diagnoses.length)],
+      severity: severities[Math.floor(Math.random() * severities.length)] as Illness['severity'],
+      department: departments[Math.floor(Math.random() * departments.length)],
+      date: randomDate(),
+    });
+  }
+  return generatedIllnesses;
+};
+
+// Replace the existing mockIllnesses with the generated data
+export const mockIllnesses: Illness[] = generateMockIllnesses(100);
+
 // Mock data
 export const mockPatients: Patient[] = [
   {
@@ -63,10 +138,10 @@ export const mockPatients: Patient[] = [
     contact: '+1-555-0123',
     address: '123 Main St, Anytown, USA',
     admissionDate: '2024-01-15',
-    ward: 'General',
+    ward: 'ICU',
     reason: 'Chest pain',
     consultingDoctor: 'Dr. Johnson',
-    status: 'Admitted'
+    status: 'Admitted',
   },
   {
     id: '2',
@@ -77,10 +152,10 @@ export const mockPatients: Patient[] = [
     contact: '+1-555-0124',
     address: '456 Oak Ave, Anytown, USA',
     admissionDate: '2024-01-16',
-    ward: 'ICU',
+    ward: 'Maternity',
     reason: 'Post-surgery monitoring',
     consultingDoctor: 'Dr. Brown',
-    status: 'In Treatment'
+    status: 'In Treatment',
   },
   {
     id: '3',
@@ -94,83 +169,87 @@ export const mockPatients: Patient[] = [
     ward: 'Emergency',
     reason: 'Severe allergic reaction',
     consultingDoctor: 'Dr. Martinez',
-    status: 'Discharged'
-  }
-];
-
-export const mockIllnesses: Illness[] = [
-  {
-    id: '1',
-    patientId: '1',
-    patientName: 'John Smith',
-    diagnosis: 'Acute Myocardial Infarction',
-    date: '2024-01-15',
-    severity: 'High',
-    department: 'Cardiology'
+    status: 'Discharged',
   },
   {
-    id: '2',
-    patientId: '2',
-    patientName: 'Sarah Wilson',
-    diagnosis: 'Post-operative complications',
-    date: '2024-01-16',
-    severity: 'Medium',
-    department: 'Surgery'
+    id: '4',
+    name: 'Emily Davis',
+    age: 67,
+    gender: 'Female',
+    guardian: 'Robert Davis',
+    contact: '+1-555-0126',
+    address: '101 Maple Ln, Anytown, USA',
+    admissionDate: '2024-01-17',
+    ward: 'Oncology',
+    reason: 'Chemotherapy session',
+    consultingDoctor: 'Dr. Lee',
+    status: 'Admitted',
   },
   {
-    id: '3',
-    patientId: '3',
-    patientName: 'Michael Chen',
-    diagnosis: 'Severe Anaphylaxis',
-    date: '2024-01-14',
-    severity: 'Critical',
-    department: 'Emergency'
-  }
+    id: '5',
+    name: 'William Green',
+    age: 7,
+    gender: 'Male',
+    guardian: 'Jessica Green',
+    contact: '+1-555-0127',
+    address: '202 Birch Rd, Anytown, USA',
+    admissionDate: '2024-01-17',
+    ward: 'Pediatrics',
+    reason: 'Viral infection',
+    consultingDoctor: 'Dr. Evans',
+    status: 'Admitted',
+  },
 ];
 
 export const mockBeds: Bed[] = [
   {
     id: '1',
     number: 'G-101',
-    ward: 'General',
+    ward: 'Cardiology',
     status: 'Occupied',
     patientId: '1',
     patientName: 'John Smith',
-    admissionDate: '2024-01-15'
+    admissionDate: '2024-01-15',
   },
   {
     id: '2',
-    number: 'G-102',
-    ward: 'General',
-    status: 'Available'
+    number: 'S-201',
+    ward: 'Surgery',
+    status: 'Available',
   },
   {
     id: '3',
-    number: 'G-103',
-    ward: 'General',
-    status: 'Cleaning'
+    number: 'E-301',
+    ward: 'Emergency',
+    status: 'Occupied',
+    patientId: '3',
+    patientName: 'Michael Chen',
+    admissionDate: '2024-01-14',
   },
   {
     id: '4',
-    number: 'I-201',
-    ward: 'ICU',
+    number: 'O-401',
+    ward: 'Oncology',
     status: 'Occupied',
-    patientId: '2',
-    patientName: 'Sarah Wilson',
-    admissionDate: '2024-01-16'
+    patientId: '4',
+    patientName: 'Emily Davis',
+    admissionDate: '2024-01-17',
   },
   {
     id: '5',
-    number: 'I-202',
-    ward: 'ICU',
-    status: 'Available'
+    number: 'P-501',
+    ward: 'Pediatrics',
+    status: 'Occupied',
+    patientId: '5',
+    patientName: 'William Green',
+    admissionDate: '2024-01-17',
   },
   {
     id: '6',
-    number: 'E-301',
-    ward: 'Emergency',
-    status: 'Reserved'
-  }
+    number: 'I-601',
+    ward: 'ICU',
+    status: 'Available',
+  },
 ];
 
 export const mockBloodInventory: BloodInventory[] = [
@@ -181,7 +260,7 @@ export const mockBloodInventory: BloodInventory[] = [
   { bloodType: 'AB+', unitsAvailable: 12, lastUpdated: '2024-01-17', minThreshold: 6 },
   { bloodType: 'AB-', unitsAvailable: 3, lastUpdated: '2024-01-17', minThreshold: 3 },
   { bloodType: 'O+', unitsAvailable: 35, lastUpdated: '2024-01-17', minThreshold: 15 },
-  { bloodType: 'O-', unitsAvailable: 6, lastUpdated: '2024-01-17', minThreshold: 8 }
+  { bloodType: 'O-', unitsAvailable: 6, lastUpdated: '2024-01-17', minThreshold: 8 },
 ];
 
 export const mockBloodTransactions: BloodTransaction[] = [
@@ -191,7 +270,7 @@ export const mockBloodTransactions: BloodTransaction[] = [
     bloodType: 'O-',
     units: 2,
     date: '2024-01-17',
-    patientName: 'John Smith'
+    patientName: 'John Smith',
   },
   {
     id: '2',
@@ -199,7 +278,7 @@ export const mockBloodTransactions: BloodTransaction[] = [
     bloodType: 'A+',
     units: 1,
     date: '2024-01-16',
-    donorName: 'Jane Doe'
+    donorName: 'Jane Doe',
   },
   {
     id: '3',
@@ -207,8 +286,8 @@ export const mockBloodTransactions: BloodTransaction[] = [
     bloodType: 'B+',
     units: 1,
     date: '2024-01-16',
-    patientName: 'Sarah Wilson'
-  }
+    patientName: 'Sarah Wilson',
+  },
 ];
 
 // Statistics data for charts
@@ -221,13 +300,14 @@ export const getIllnessStats = () => {
   return illnessCount;
 };
 
-export const getWaitingTimesData = () => [
-  { department: 'Emergency', avgWaitTime: 15 },
-  { department: 'General', avgWaitTime: 45 },
-  { department: 'ICU', avgWaitTime: 30 },
-  { department: 'Surgery', avgWaitTime: 60 },
-  { department: 'Cardiology', avgWaitTime: 35 }
-];
+// Updated function to generate waiting times for all wards
+export const getWaitingTimesData = () => {
+  const waitingTimes = departments.map(department => ({
+    department,
+    avgWaitTime: Math.floor(Math.random() * 60) + 5, // Generate a random wait time between 5 and 64 minutes
+  }));
+  return waitingTimes.sort((a, b) => a.department.localeCompare(b.department));
+};
 
 export const getAdmissionTrend = () => [
   { date: '2024-01-10', admissions: 12, discharges: 8 },
@@ -237,5 +317,5 @@ export const getAdmissionTrend = () => [
   { date: '2024-01-14', admissions: 20, discharges: 16 },
   { date: '2024-01-15', admissions: 25, discharges: 18 },
   { date: '2024-01-16', admissions: 28, discharges: 20 },
-  { date: '2024-01-17', admissions: 24, discharges: 22 }
+  { date: '2024-01-17', admissions: 24, discharges: 22 },
 ];

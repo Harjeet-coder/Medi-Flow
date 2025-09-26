@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Search, Activity, BarChart, Map } from 'lucide-react';
-import { Illness, mockIllnesses, getIllnessStats } from '@/data/mockData';
-import { Bar, Doughnut } from 'react-chartjs-2';
+import { Illness, mockIllnesses, getIllnessStats, departments } from '@/data/mockData';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -38,6 +38,14 @@ const IllnessDashboard: React.FC = () => {
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const { toast } = useToast();
 
+  // Pagination state for departments list
+  const [departmentCurrentPage, setDepartmentCurrentPage] = useState(1);
+  const departmentsPerPage = 10; // Adjust this number to change items per page
+
+  // Pagination state for illness records list
+  const [recordsCurrentPage, setRecordsCurrentPage] = useState(1);
+  const recordsPerPage = 10; // Adjust this number for records per page
+
   // Form state
   const [formData, setFormData] = useState({
     patientName: '',
@@ -53,7 +61,7 @@ const IllnessDashboard: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.patientName || !formData.diagnosis) {
+    if (!formData.patientName || !formData.diagnosis || !formData.department) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -87,7 +95,7 @@ const IllnessDashboard: React.FC = () => {
   // Filter illnesses
   const filteredIllnesses = illnesses.filter(illness => {
     const matchesSearch = illness.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         illness.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
+                          illness.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = filterSeverity === 'all' || illness.severity === filterSeverity;
     return matchesSearch && matchesSeverity;
   });
@@ -107,51 +115,35 @@ const IllnessDashboard: React.FC = () => {
         label: 'Number of Cases',
         data: Object.values(illnessStats),
         backgroundColor: [
-          'hsl(var(--primary) / 0.8)',
-          'hsl(var(--secondary) / 0.8)',
-          'hsl(var(--warning) / 0.8)',
-          'hsl(var(--destructive) / 0.8)',
-          'hsl(var(--success) / 0.8)',
+          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', 
+          '#5D8BF4', '#F36E6E', '#8E44AD', '#2ECC71', '#E67E22', '#D35400', 
+          '#34495E', '#A9CCE3', '#5B2C6F', '#F1948A', '#C0392B', '#FAD7A0', 
+          '#16A085', '#27AE60',
         ],
-        borderColor: [
-          'hsl(var(--primary))',
-          'hsl(var(--secondary))',
-          'hsl(var(--warning))',
-          'hsl(var(--destructive))',
-          'hsl(var(--success))',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  // Department distribution chart
-  const departmentChartData = {
-    labels: Object.keys(departmentStats),
-    datasets: [
-      {
-        data: Object.values(departmentStats),
-        backgroundColor: [
-          'hsl(var(--primary) / 0.8)',
-          'hsl(var(--secondary) / 0.8)',
-          'hsl(var(--warning) / 0.8)',
-          'hsl(var(--destructive) / 0.8)',
-          'hsl(var(--success) / 0.8)',
-        ],
-        borderColor: [
-          'hsl(var(--primary))',
-          'hsl(var(--secondary))',
-          'hsl(var(--warning))',
-          'hsl(var(--destructive))',
-          'hsl(var(--success))',
-        ],
+        borderColor: 'white',
         borderWidth: 2,
       },
     ],
   };
 
+  // Pagination logic for departments list
+  const sortedDepartments = Object.entries(departmentStats).sort(([deptA], [deptB]) =>
+    deptA.localeCompare(deptB)
+  );
+  const totalDepartmentPages = Math.ceil(sortedDepartments.length / departmentsPerPage);
+  const departmentStartIndex = (departmentCurrentPage - 1) * departmentsPerPage;
+  const departmentEndIndex = departmentStartIndex + departmentsPerPage;
+  const departmentsToDisplay = sortedDepartments.slice(departmentStartIndex, departmentEndIndex);
+
+  // Pagination logic for illness records list
+  const totalRecordsPages = Math.ceil(filteredIllnesses.length / recordsPerPage);
+  const recordsStartIndex = (recordsCurrentPage - 1) * recordsPerPage;
+  const recordsEndIndex = recordsStartIndex + recordsPerPage;
+  const recordsToDisplay = filteredIllnesses.slice(recordsStartIndex, recordsEndIndex);
+
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
@@ -168,19 +160,6 @@ const IllnessDashboard: React.FC = () => {
     },
   };
 
-  const doughnutOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-      },
-      title: {
-        display: true,
-        text: 'Cases by Department',
-      },
-    },
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -188,17 +167,13 @@ const IllnessDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold text-foreground">Illness Insights</h1>
           <p className="text-muted-foreground">Track diseases, patterns, and department analytics</p>
         </div>
-        <Button onClick={() => setShowAddForm(true)} className="flex items-center">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Record
-        </Button>
+        
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="records">Illness Records</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -269,38 +244,89 @@ const IllnessDashboard: React.FC = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle>Department Distribution</CardTitle>
-                <CardDescription>Cases by hospital department</CardDescription>
+                <CardTitle>Department Workload</CardTitle>
+                <CardDescription>Case distribution by department</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
-                  <Doughnut data={departmentChartData} options={doughnutOptions} />
+                <div className="space-y-4">
+                  {departmentsToDisplay.map(([dept, count]) => {
+                    const percentage = (count / illnesses.length) * 100;
+                    return (
+                      <div key={dept} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{dept}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-24 bg-muted rounded-full h-2">
+                            <div 
+                              className="h-2 rounded-full bg-primary"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm text-muted-foreground w-12">{count}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Pagination Controls */}
+                {totalDepartmentPages > 1 && (
+                  <div className="flex justify-between items-center mt-4">
+                    <Button
+                      variant="outline"
+                      disabled={departmentCurrentPage === 1}
+                      onClick={() => setDepartmentCurrentPage(prev => Math.max(1, prev - 1))}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {departmentCurrentPage} of {totalDepartmentPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      disabled={departmentCurrentPage === totalDepartmentPages}
+                      onClick={() => setDepartmentCurrentPage(prev => Math.min(totalDepartmentPages, prev + 1))}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Severity Distribution</CardTitle>
+                <CardDescription>Cases by severity level</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {['Critical', 'High', 'Medium', 'Low'].map(severity => {
+                    const count = illnesses.filter(i => i.severity === severity).length;
+                    const percentage = (count / illnesses.length) * 100;
+                    return (
+                      <div key={severity} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{severity}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-24 bg-muted rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full ${
+                                severity === 'Critical' ? 'bg-destructive' :
+                                severity === 'High' ? 'bg-warning' :
+                                severity === 'Medium' ? 'bg-primary' : 'bg-secondary'
+                              }`}
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm text-muted-foreground w-12">{count}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Geographic Heatmap Placeholder */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Map className="h-5 w-5 mr-2 text-primary" />
-                Geographic Distribution (Mock Heatmap)
-              </CardTitle>
-              <CardDescription>Illness distribution across regions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted rounded-lg p-8 text-center">
-                <Map className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
-                  Interactive heatmap would show illness distribution across hospital catchment areas
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  In production: Integrate with mapping service (e.g., Leaflet, Mapbox)
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="records" className="space-y-6">
@@ -357,11 +383,9 @@ const IllnessDashboard: React.FC = () => {
                         <SelectValue placeholder="Select department" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Emergency">Emergency</SelectItem>
-                        <SelectItem value="Cardiology">Cardiology</SelectItem>
-                        <SelectItem value="Surgery">Surgery</SelectItem>
-                        <SelectItem value="Internal Medicine">Internal Medicine</SelectItem>
-                        <SelectItem value="Pediatrics">Pediatrics</SelectItem>
+                        {departments.map(dept => (
+                          <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -408,7 +432,7 @@ const IllnessDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Illness Records Table */}
+          {/* Illness Records Table with Pagination */}
           <Card>
             <CardHeader>
               <CardTitle>Illness Records ({filteredIllnesses.length})</CardTitle>
@@ -416,7 +440,7 @@ const IllnessDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {filteredIllnesses.map((illness) => (
+                {recordsToDisplay.map((illness) => (
                   <div key={illness.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="space-y-1">
@@ -445,73 +469,30 @@ const IllnessDashboard: React.FC = () => {
                   </div>
                 )}
               </div>
+              {/* Pagination Controls for Records */}
+              {totalRecordsPages > 1 && (
+                <div className="flex justify-between items-center mt-4">
+                  <Button
+                    variant="outline"
+                    disabled={recordsCurrentPage === 1}
+                    onClick={() => setRecordsCurrentPage(prev => Math.max(1, prev - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Page {recordsCurrentPage} of {totalRecordsPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={recordsCurrentPage === totalRecordsPages}
+                    onClick={() => setRecordsCurrentPage(prev => Math.min(totalRecordsPages, prev + 1))}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Severity Distribution</CardTitle>
-                <CardDescription>Cases by severity level</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {['Critical', 'High', 'Medium', 'Low'].map(severity => {
-                    const count = illnesses.filter(i => i.severity === severity).length;
-                    const percentage = (count / illnesses.length) * 100;
-                    return (
-                      <div key={severity} className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{severity}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                severity === 'Critical' ? 'bg-destructive' :
-                                severity === 'High' ? 'bg-warning' :
-                                severity === 'Medium' ? 'bg-primary' : 'bg-secondary'
-                              }`}
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-muted-foreground w-12">{count}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Department Workload</CardTitle>
-                <CardDescription>Case distribution by department</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {Object.entries(departmentStats).map(([dept, count]) => {
-                    const percentage = (count / illnesses.length) * 100;
-                    return (
-                      <div key={dept} className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{dept}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div 
-                              className="h-2 rounded-full bg-primary"
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-muted-foreground w-12">{count}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </div>

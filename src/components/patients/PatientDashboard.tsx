@@ -9,6 +9,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Search, Clock, TrendingUp } from 'lucide-react';
 import { Patient, mockPatients, getWaitingTimesData, getAdmissionTrend } from '@/data/mockData';
+
+// Define wards here if not exported from mockData
+const wards = [
+  "General",
+  "ICU",
+  "Pediatrics",
+  "Maternity",
+  "Surgery",
+  "Orthopedics",
+  "Cardiology"
+];
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -98,7 +109,7 @@ const PatientDashboard: React.FC = () => {
   // Filter patients
   const filteredPatients = patients.filter(patient => {
     const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         patient.consultingDoctor.toLowerCase().includes(searchTerm.toLowerCase());
+                          patient.consultingDoctor.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesWard = filterWard === 'all' || patient.ward === filterWard;
     return matchesSearch && matchesWard;
   });
@@ -163,7 +174,6 @@ const PatientDashboard: React.FC = () => {
         <TabsList>
           <TabsTrigger value="patients">Patient List</TabsTrigger>
           <TabsTrigger value="waiting-times">Waiting Times</TabsTrigger>
-          <TabsTrigger value="trends">Admission Trends</TabsTrigger>
         </TabsList>
 
         <TabsContent value="patients" className="space-y-6">
@@ -241,10 +251,9 @@ const PatientDashboard: React.FC = () => {
                         <SelectValue placeholder="Select ward" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="General">General</SelectItem>
-                        <SelectItem value="ICU">ICU</SelectItem>
-                        <SelectItem value="Emergency">Emergency</SelectItem>
-                        <SelectItem value="Surgery">Surgery</SelectItem>
+                        {wards.map(ward => (
+                            <SelectItem key={ward} value={ward}>{ward}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -305,16 +314,16 @@ const PatientDashboard: React.FC = () => {
                     />
                   </div>
                 </div>
+                <Label htmlFor="ward">Ward</Label>
                 <Select value={filterWard} onValueChange={setFilterWard}>
                   <SelectTrigger className="w-full md:w-48">
                     <SelectValue placeholder="Filter by ward" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Wards</SelectItem>
-                    <SelectItem value="General">General</SelectItem>
-                    <SelectItem value="ICU">ICU</SelectItem>
-                    <SelectItem value="Emergency">Emergency</SelectItem>
-                    <SelectItem value="Surgery">Surgery</SelectItem>
+                    {wards.map(ward => (
+                        <SelectItem key={ward} value={ward}>{ward}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -336,7 +345,7 @@ const PatientDashboard: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-foreground">{patient.name}</h3>
                           <Badge variant={patient.status === 'Admitted' ? 'default' : 
-                                        patient.status === 'Discharged' ? 'secondary' : 'outline'}>
+                                         patient.status === 'Discharged' ? 'secondary' : 'outline'}>
                             {patient.status}
                           </Badge>
                         </div>
@@ -381,7 +390,7 @@ const PatientDashboard: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium text-foreground">{dept.department}</h3>
                       <Badge variant={dept.avgWaitTime > 45 ? 'destructive' : 
-                                   dept.avgWaitTime > 30 ? 'outline' : 'secondary'}>
+                                     dept.avgWaitTime > 30 ? 'outline' : 'secondary'}>
                         {dept.avgWaitTime}min
                       </Badge>
                     </div>
